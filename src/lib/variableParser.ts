@@ -1,8 +1,9 @@
+import { PromptItem } from "@/types/prompt";
+
 /**
  * Utility untuk mengekstrak dan mengganti variabel dinamis {{VAR_NAME}} pada teks prompt.
  */
 
-// Regex untuk mencocokkan {{NAMA_VARIABEL}}
 const VARIABLE_REGEX = /\{\{([A-Z0-9_]+)\}\}/gi;
 
 export interface ExtractedVariable {
@@ -28,7 +29,6 @@ export function extractVariables(content: string): ExtractedVariable[] {
     if (!uniqueKeys.has(upperKey)) {
       uniqueKeys.add(upperKey);
 
-      // Ubah IDE_PRODUK menjadi "Ide Produk" untuk label UI
       const label = rawKey
         .split("_")
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
@@ -56,7 +56,6 @@ export function replaceVariables(
 
   return content.replace(VARIABLE_REGEX, (match, p1) => {
     const key = p1.trim();
-    // Cari nilai di valuesMap (case-insensitive)
     const foundKey = Object.keys(valuesMap).find(
       (k) => k.toUpperCase() === key.toUpperCase()
     );
@@ -64,7 +63,110 @@ export function replaceVariables(
     if (foundKey && valuesMap[foundKey]?.trim()) {
       return valuesMap[foundKey].trim();
     }
-    // Jika tidak diisi, kembalikan placeholder asli
     return match;
   });
+}
+
+/**
+ * Mengubah PromptItem menjadi format markdown SKILL.md (v2.0)
+ */
+export function generateSkillMarkdown(prompt: PromptItem): string {
+  const vars = extractVariables(prompt.content);
+  const slugTitle = prompt.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+  return `# Skill: ${prompt.title}
+
+---
+
+## 1. Nama Skill
+\`${slugTitle}\`
+
+---
+
+## 2. Deskripsi & Trigger
+${prompt.description || "Reusable prompt skill for AI Agent & LLM workflow."}
+
+---
+
+## 3. Variabel Dinamis
+${vars.length > 0 ? vars.map((v, i) => `${i + 1}. \`{{${v.key}}}\`: ${v.label}`).join("\n") : "Prompt ini tidak memerlukan variabel dinamis."}
+
+---
+
+## 4. Isi Template Prompt
+\`\`\`text
+${prompt.content}
+\`\`\`
+
+---
+
+## 5. Metadata
+- Category: ${prompt.categoryId}
+- Tags: ${prompt.tags?.join(", ") || "-"}
+- Exported from: PromptVault v2.0
+`;
+}
+
+/**
+ * Mengunduh file .skill.md
+ */
+export function downloadSkillMarkdown(prompt: PromptItem): void {
+  const skillContent = generateSkillMarkdown(prompt);
+  const blob = new Blob([skillContent], { type: "text/markdown;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  
+  const slugTitle = prompt.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${slugTitle}.skill.md`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * Mengencode prompt menjadi URL Shareable (v2.0)
+ */
+export function generateShareableUrl(prompt: PromptItem): string {
+  if (typeof window === "undefined") return "";
+
+  const payload = {
+    t: prompt.title,
+    d: prompt.description || "",
+    c: prompt.content,
+    cat: prompt.categoryId,
+    tags: prompt.tags || [],
+  };
+
+  const jsonStr = JSON.stringify(payload);
+  // Base64 encode safe for URL
+  const encoded = btoa(encodeURIComponent(jsonStr));
+  const baseUrl = window.location.origin + window.location.pathname;
+  return `${baseUrl}?share=${encoded}`;
+}
+
+/**
+ * Meng-decode data prompt dari URL query parameter ?share=...
+ */
+export function parseShareableUrlParam(encodedStr: string): Partial<PromptItem> | null {
+  try {
+    const jsonStr = decodeURIComponent(atob(encodedStr));
+    const parsed = JSON.parse(jsonStr);
+
+    if (!parsed || typeof parsed !== "object" || !parsed.t || !parsed.c) {
+      return null;
+    }
+
+    return {
+      title: String(parsed.t).trim(),
+      description: typeof parsed.d === "string" ? parsed.d.trim() : "",
+      content: String(parsed.c).trim(),
+      categoryId: typeof parsed.cat === "string" ? parsed.cat : "engineering",
+      tags: Array.isArray(parsed.tags) ? parsed.tags : [],
+    };
+  } catch (err) {
+    console.error("Gagal parse shareable URL parameter:", err);
+    return null;
+  }
 }

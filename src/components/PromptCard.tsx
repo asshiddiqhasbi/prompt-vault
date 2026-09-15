@@ -1,9 +1,9 @@
 "use client";
 
-import React from "react";
-import { Star, Copy, Edit2, Trash2 } from "lucide-react";
+import React, { useState } from "react";
+import { Star, Copy, Edit2, Trash2, Share2, FileCode, Check } from "lucide-react";
 import { Category, PromptItem } from "@/types/prompt";
-import { extractVariables } from "@/lib/variableParser";
+import { extractVariables, downloadSkillMarkdown, generateShareableUrl } from "@/lib/variableParser";
 
 interface PromptCardProps {
   prompt: PromptItem;
@@ -22,18 +22,64 @@ export const PromptCard: React.FC<PromptCardProps> = ({
   onEditPrompt,
   onDeletePrompt,
 }) => {
+  const [isShareCopied, setIsShareCopied] = useState(false);
   const variables = extractVariables(prompt.content);
+
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const url = generateShareableUrl(prompt);
+    try {
+      await navigator.clipboard.writeText(url);
+      setIsShareCopied(true);
+      setTimeout(() => setIsShareCopied(false), 2000);
+    } catch (err) {
+      console.error("Gagal menyalin link share:", err);
+    }
+  };
+
+  const handleExportSkill = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    downloadSkillMarkdown(prompt);
+  };
 
   return (
     <div className="group flex flex-col justify-between bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700 rounded-lg p-4 transition-colors">
       {/* Top Header: Category & Actions */}
       <div>
         <div className="flex items-center justify-between gap-2 mb-2.5">
-          <span className="px-2 py-0.5 text-[10px] font-medium font-mono rounded bg-zinc-800/80 text-zinc-300 border border-zinc-700/60">
-            {category?.name || "General"}
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className="px-2 py-0.5 text-[10px] font-medium font-mono rounded bg-zinc-800/80 text-zinc-300 border border-zinc-700/60">
+              {category?.name || "General"}
+            </span>
+
+            {prompt.copyCount && prompt.copyCount > 0 ? (
+              <span className="text-[10px] font-mono text-zinc-500">
+                {prompt.copyCount}x dipakai
+              </span>
+            ) : null}
+          </div>
 
           <div className="flex items-center gap-1">
+            <button
+              onClick={handleShare}
+              className="p-1 text-zinc-500 hover:text-zinc-300 transition-colors"
+              title="Salin Link Shareable Prompt"
+            >
+              {isShareCopied ? (
+                <Check className="w-3.5 h-3.5 text-emerald-400" />
+              ) : (
+                <Share2 className="w-3.5 h-3.5" />
+              )}
+            </button>
+
+            <button
+              onClick={handleExportSkill}
+              className="p-1 text-zinc-500 hover:text-blue-400 transition-colors"
+              title="Export ke SKILL.md (Format Antigravity)"
+            >
+              <FileCode className="w-3.5 h-3.5" />
+            </button>
+
             <button
               onClick={() => onToggleFavorite(prompt.id)}
               className="p-1 text-zinc-500 hover:text-amber-400 transition-colors"

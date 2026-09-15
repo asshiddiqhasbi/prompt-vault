@@ -6,6 +6,8 @@ export interface PromptItem {
   categoryId: string; // Kategori ID
   tags: string[];
   isFavorite: boolean;
+  copyCount?: number; // Jumlah berapa kali prompt di-copy (v2.0)
+  lastUsedAt?: string; // ISO string kapan terakhir dipakai (v2.0)
   createdAt: string;
   updatedAt: string;
 }
@@ -28,3 +30,5 @@ export interface ExportData {
   prompts: PromptItem[];
   categories: Category[];
 }
+
+export type SortOption = "latest" | "most_used" | "recently_used" | "alphabetical";

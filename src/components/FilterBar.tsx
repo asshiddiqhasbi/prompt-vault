@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { Search, X, Star } from "lucide-react";
-import { Category } from "@/types/prompt";
+import { Search, X, Star, ArrowUpDown } from "lucide-react";
+import { Category, SortOption } from "@/types/prompt";
 
 interface FilterBarProps {
   searchQuery: string;
@@ -15,6 +15,8 @@ interface FilterBarProps {
   onToggleTag: (tag: string) => void;
   showFavoritesOnly: boolean;
   onToggleFavoritesOnly: () => void;
+  sortBy: SortOption;
+  onSortChange: (sort: SortOption) => void;
 }
 
 export const FilterBar: React.FC<FilterBarProps> = ({
@@ -28,6 +30,8 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   onToggleTag,
   showFavoritesOnly,
   onToggleFavoritesOnly,
+  sortBy,
+  onSortChange,
 }) => {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -73,7 +77,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         </div>
       </div>
 
-      {/* Category Tabs & Favorite Filter */}
+      {/* Category Tabs, Sort Selector & Favorite Filter */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800/80 pb-2">
         <div className="flex items-center gap-1 overflow-x-auto max-w-full no-scrollbar">
           {categories.map((cat) => {
@@ -94,18 +98,35 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           })}
         </div>
 
-        {/* Favorite Filter Toggle */}
-        <button
-          onClick={onToggleFavoritesOnly}
-          className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded transition-colors border ${
-            showFavoritesOnly
-              ? "bg-zinc-800 text-amber-300 border-zinc-700"
-              : "text-zinc-400 border-zinc-800 hover:bg-zinc-900 hover:text-zinc-200"
-          }`}
-        >
-          <Star className={`w-3.5 h-3.5 ${showFavoritesOnly ? "fill-amber-400 text-amber-400" : ""}`} />
-          <span>Favorit</span>
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Sorting Dropdown */}
+          <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 rounded px-2 py-0.5">
+            <ArrowUpDown className="w-3 h-3 text-zinc-500" />
+            <select
+              value={sortBy}
+              onChange={(e) => onSortChange(e.target.value as SortOption)}
+              className="bg-transparent text-[11px] text-zinc-300 font-mono focus:outline-none cursor-pointer"
+            >
+              <option value="latest">Terbaru</option>
+              <option value="most_used">Paling Sering Dipakai</option>
+              <option value="recently_used">Terakhir Dipakai</option>
+              <option value="alphabetical">Abjad A-Z</option>
+            </select>
+          </div>
+
+          {/* Favorite Filter Toggle */}
+          <button
+            onClick={onToggleFavoritesOnly}
+            className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded transition-colors border ${
+              showFavoritesOnly
+                ? "bg-zinc-800 text-amber-300 border-zinc-700"
+                : "text-zinc-400 border-zinc-800 hover:bg-zinc-900 hover:text-zinc-200"
+            }`}
+          >
+            <Star className={`w-3.5 h-3.5 ${showFavoritesOnly ? "fill-amber-400 text-amber-400" : ""}`} />
+            <span>Favorit</span>
+          </button>
+        </div>
       </div>
 
       {/* Tags Filter Bar */}

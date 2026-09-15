@@ -7,23 +7,26 @@ import { PromptCard } from "@/components/PromptCard";
 import { UsePromptModal } from "@/components/UsePromptModal";
 import { PromptEditorModal } from "@/components/PromptEditorModal";
 import { ExportImportModal } from "@/components/ExportImportModal";
-import { Category, PromptItem } from "@/types/prompt";
+import { SharedPromptModal } from "@/components/SharedPromptModal";
+import { Category, PromptItem, SortOption } from "@/types/prompt";
 import {
   getStoredCategories,
   getStoredPrompts,
   savePrompts,
 } from "@/lib/storage";
+import { parseShareableUrlParam } from "@/lib/variableParser";
 import { Plus, RefreshCw, Terminal } from "lucide-react";
 
 export default function DashboardPage() {
   const [prompts, setPrompts] = useState<PromptItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
 
-  // Filters State
+  // Filters & Sorting State
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption>("latest");
 
   // Modals State
   const [selectedPromptForUse, setSelectedPromptForUse] = useState<PromptItem | null>(null);
@@ -34,10 +37,28 @@ export default function DashboardPage() {
 
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
 
-  // Initial Load from LocalStorage
+  // URL Shared Prompt Modal State
+  const [sharedPromptFromUrl, setSharedPromptFromUrl] = useState<Partial<PromptItem> | null>(null);
+  const [isSharedModalOpen, setIsSharedModalOpen] = useState(false);
+
+  // Initial Load & Check URL Search Params
   useEffect(() => {
-    setPrompts(getStoredPrompts());
+    const loadedPrompts = getStoredPrompts();
+    setPrompts(loadedPrompts);
     setCategories(getStoredCategories());
+
+    // Check ?share=... query param
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      const shareParam = urlParams.get("share");
+      if (shareParam) {
+        const parsed = parseShareableUrlParam(shareParam);
+        if (parsed) {
+          setSharedPromptFromUrl(parsed);
+          setIsSharedModalOpen(true);
+        }
+      }
+    }
   }, []);
 
   // Update LocalStorage whenever prompts state changes
@@ -46,16 +67,16 @@ export default function DashboardPage() {
     savePrompts(newPrompts);
   };
 
-  // Collect all unique tags for filter cloud
+  // Collect all unique tags
   const allTags = useMemo(() => {
     const tagsSet = new Set<string>();
     prompts.forEach((p) => p.tags?.forEach((t) => tagsSet.add(t)));
     return Array.from(tagsSet);
   }, [prompts]);
 
-  // Filter Logic
+  // Filter & Sort Logic
   const filteredPrompts = useMemo(() => {
-    return prompts.filter((prompt) => {
+    const filtered = prompts.filter((prompt) => {
       // Filter Category
       if (selectedCategory !== "all" && prompt.categoryId !== selectedCategory) {
         return false;
@@ -66,7 +87,7 @@ export default function DashboardPage() {
         return false;
       }
 
-      // Filter Tags (Must include all selected tags)
+      // Filter Tags
       if (selectedTags.length > 0) {
         const hasAllTags = selectedTags.every((t) => prompt.tags?.includes(t));
         if (!hasAllTags) return false;
@@ -87,12 +108,41 @@ export default function DashboardPage() {
 
       return true;
     });
-  }, [prompts, selectedCategory, showFavoritesOnly, selectedTags, searchQuery]);
+
+    // Sorting Logic
+    return filtered.sort((a, b) => {
+      if (sortBy === "most_used") {
+        return (b.copyCount || 0) - (a.copyCount || 0);
+      }
+      if (sortBy === "recently_used") {
+        const dateA = a.lastUsedAt ? new Date(a.lastUsedAt).getTime() : 0;
+        const dateB = b.lastUsedAt ? new Date(b.lastUsedAt).getTime() : 0;
+        return dateB - dateA;
+      }
+      if (sortBy === "alphabetical") {
+        return a.title.localeCompare(b.title);
+      }
+      // Default 'latest'
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  }, [prompts, selectedCategory, showFavoritesOnly, selectedTags, searchQuery, sortBy]);
 
   // Handlers
   const handleUsePrompt = (prompt: PromptItem) => {
     setSelectedPromptForUse(prompt);
     setIsUseModalOpen(true);
+
+    // Track usage count & last used
+    const updated = prompts.map((p) =>
+      p.id === prompt.id
+        ? {
+            ...p,
+            copyCount: (p.copyCount || 0) + 1,
+            lastUsedAt: new Date().toISOString(),
+          }
+        : p
+    );
+    updatePrompts(updated);
   };
 
   const handleToggleFavorite = (id: string) => {
@@ -125,6 +175,7 @@ export default function DashboardPage() {
         categoryId: data.categoryId || "engineering",
         tags: data.tags || [],
         isFavorite: false,
+        copyCount: 0,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -156,6 +207,7 @@ export default function DashboardPage() {
     setSelectedCategory("all");
     setSelectedTags([]);
     setShowFavoritesOnly(false);
+    setSortBy("latest");
   };
 
   return (
@@ -196,6 +248,8 @@ export default function DashboardPage() {
           onToggleTag={handleToggleTag}
           showFavoritesOnly={showFavoritesOnly}
           onToggleFavoritesOnly={() => setShowFavoritesOnly(!showFavoritesOnly)}
+          sortBy={sortBy}
+          onSortChange={setSortBy}
         />
 
         {/* Prompts Card Grid */}
@@ -257,7 +311,7 @@ export default function DashboardPage() {
 
       {/* Footer */}
       <footer className="border-t border-zinc-800/80 bg-zinc-950 py-4 text-center text-[11px] font-mono text-zinc-500">
-        <p>PromptVault v1.0 • Modern Minimalist Developer Tool</p>
+        <p>PromptVault v2.0 • Modern Minimalist Developer Tool</p>
       </footer>
 
       {/* Modals */}
@@ -281,6 +335,13 @@ export default function DashboardPage() {
         isOpen={isBackupModalOpen}
         onClose={() => setIsBackupModalOpen(false)}
         onImportSuccess={handleImportSuccess}
+      />
+
+      <SharedPromptModal
+        sharedPrompt={sharedPromptFromUrl}
+        isOpen={isSharedModalOpen}
+        onClose={() => setIsSharedModalOpen(false)}
+        onSaveToVault={handleSavePrompt}
       />
     </div>
   );
