@@ -8,6 +8,7 @@ import { UsePromptModal } from "@/components/UsePromptModal";
 import { PromptEditorModal } from "@/components/PromptEditorModal";
 import { ExportImportModal } from "@/components/ExportImportModal";
 import { SharedPromptModal } from "@/components/SharedPromptModal";
+import { CategoryManagerModal } from "@/components/CategoryManagerModal";
 import { Category, PromptItem, SortOption } from "@/types/prompt";
 import {
   getStoredCategories,
@@ -37,6 +38,7 @@ export default function DashboardPage() {
   const [isEditorModalOpen, setIsEditorModalOpen] = useState(false);
 
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
+  const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false);
 
   // URL Shared Prompt Modal State
   const [sharedPromptFromUrl, setSharedPromptFromUrl] = useState<Partial<PromptItem> | null>(null);
@@ -69,22 +71,66 @@ export default function DashboardPage() {
   };
 
   // Add new Custom Category
-  const handleAddCategory = (catName: string) => {
+  const handleAddCategory = ({ name, colorKey }: { name: string; colorKey: string }) => {
     const newCatId = `custom-${Date.now()}`;
+    const colorMap: Record<string, Category["color"]> = {
+      emerald: { bg: "bg-emerald-950/50", text: "text-emerald-300", border: "border-emerald-800/40" },
+      purple: { bg: "bg-purple-950/50", text: "text-purple-300", border: "border-purple-800/40" },
+      blue: { bg: "bg-blue-950/50", text: "text-blue-300", border: "border-blue-800/40" },
+      cyan: { bg: "bg-cyan-950/50", text: "text-cyan-300", border: "border-cyan-800/40" },
+      amber: { bg: "bg-amber-950/50", text: "text-amber-300", border: "border-amber-800/40" },
+      rose: { bg: "bg-rose-950/50", text: "text-rose-300", border: "border-rose-800/40" },
+      zinc: { bg: "bg-zinc-900", text: "text-zinc-300", border: "border-zinc-700" },
+    };
+
     const newCategory: Category = {
       id: newCatId,
-      name: catName,
+      name,
       slug: newCatId,
-      color: {
-        bg: "bg-emerald-950/40",
-        text: "text-emerald-300",
-        border: "border-emerald-800/40",
-      },
+      isDefault: false,
+      color: colorMap[colorKey] || colorMap.zinc,
     };
+
     const updatedCategories = [...categories, newCategory];
     setCategories(updatedCategories);
     saveCategories(updatedCategories);
     setSelectedCategory(newCatId);
+  };
+
+  // Edit Existing Custom Category
+  const handleEditCategory = (catId: string, newName: string, colorKey: string) => {
+    const colorMap: Record<string, Category["color"]> = {
+      emerald: { bg: "bg-emerald-950/50", text: "text-emerald-300", border: "border-emerald-800/40" },
+      purple: { bg: "bg-purple-950/50", text: "text-purple-300", border: "border-purple-800/40" },
+      blue: { bg: "bg-blue-950/50", text: "text-blue-300", border: "border-blue-800/40" },
+      cyan: { bg: "bg-cyan-950/50", text: "text-cyan-300", border: "border-cyan-800/40" },
+      amber: { bg: "bg-amber-950/50", text: "text-amber-300", border: "border-amber-800/40" },
+      rose: { bg: "bg-rose-950/50", text: "text-rose-300", border: "border-rose-800/40" },
+      zinc: { bg: "bg-zinc-900", text: "text-zinc-300", border: "border-zinc-700" },
+    };
+
+    const updatedCategories = categories.map((c) =>
+      c.id === catId ? { ...c, name: newName, color: colorMap[colorKey] || c.color } : c
+    );
+    setCategories(updatedCategories);
+    saveCategories(updatedCategories);
+  };
+
+  // Delete Custom Category (Safely re-assign prompts to 'writing' or 'tech')
+  const handleDeleteCategory = (catId: string) => {
+    const updatedCategories = categories.filter((c) => c.id !== catId);
+    setCategories(updatedCategories);
+    saveCategories(updatedCategories);
+
+    // Re-assign prompts in deleted category to 'writing'
+    const updatedPrompts = prompts.map((p) =>
+      p.categoryId === catId ? { ...p, categoryId: "writing" } : p
+    );
+    updatePrompts(updatedPrompts);
+
+    if (selectedCategory === catId) {
+      setSelectedCategory("all");
+    }
   };
 
   // Collect all unique tags
@@ -282,7 +328,7 @@ export default function DashboardPage() {
           onToggleFavoritesOnly={() => setShowFavoritesOnly(!showFavoritesOnly)}
           sortBy={sortBy}
           onSortChange={setSortBy}
-          onAddCategory={handleAddCategory}
+          onOpenCategoryManager={() => setIsCategoryManagerOpen(true)}
         />
 
         {/* Prompts Card Grid */}
@@ -375,6 +421,15 @@ export default function DashboardPage() {
         isOpen={isSharedModalOpen}
         onClose={() => setIsSharedModalOpen(false)}
         onSaveToVault={handleSavePrompt}
+      />
+
+      <CategoryManagerModal
+        categories={categories}
+        isOpen={isCategoryManagerOpen}
+        onClose={() => setIsCategoryManagerOpen(false)}
+        onAddCategory={handleAddCategory}
+        onEditCategory={handleEditCategory}
+        onDeleteCategory={handleDeleteCategory}
       />
     </div>
   );

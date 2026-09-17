@@ -5,12 +5,14 @@ export const DEFAULT_CATEGORIES: Category[] = [
     id: "all",
     name: "Semua",
     slug: "all",
+    isDefault: true,
     color: { bg: "bg-zinc-800", text: "text-zinc-200", border: "border-zinc-700" }
   },
   {
     id: "writing",
     name: "✍️ Writing & Copywriting",
     slug: "writing",
+    isDefault: true,
     description: "Script video, artikel, email, caption, dan penulisan kreatif",
     color: { bg: "bg-purple-950/50", text: "text-purple-300", border: "border-purple-800/40" }
   },
@@ -18,6 +20,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     id: "business",
     name: "🚀 Business & Marketing",
     slug: "business",
+    isDefault: true,
     description: "Copy iklan, strategi jualan, pitch deck, dan ide bisnis",
     color: { bg: "bg-blue-950/50", text: "text-blue-300", border: "border-blue-800/40" }
   },
@@ -25,6 +28,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     id: "education",
     name: "🎓 Education & Study",
     slug: "education",
+    isDefault: true,
     description: "Rangkum jurnal/artikel, penjelas konsep, dan latihan soal",
     color: { bg: "bg-emerald-950/50", text: "text-emerald-300", border: "border-emerald-800/40" }
   },
@@ -32,6 +36,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     id: "creative",
     name: "🎨 Creativity & Visual AI",
     slug: "creative",
+    isDefault: true,
     description: "Prompt gambar Midjourney/DALL-E, ide konten, dan visual",
     color: { bg: "bg-rose-950/50", text: "text-rose-300", border: "border-rose-800/40" }
   },
@@ -39,6 +44,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     id: "productivity",
     name: "⚡ Productivity & Daily",
     slug: "productivity",
+    isDefault: true,
     description: "Perencanaan harian, balasan chat/email, dan habit tracker",
     color: { bg: "bg-amber-950/50", text: "text-amber-300", border: "border-amber-800/40" }
   },
@@ -46,6 +52,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
     id: "tech",
     name: "💻 Tech & Engineering",
     slug: "tech",
+    isDefault: true,
     description: "Debugging error, koding, PRD produk, dan arsitektur tech",
     color: { bg: "bg-cyan-950/50", text: "text-cyan-300", border: "border-cyan-800/40" }
   }

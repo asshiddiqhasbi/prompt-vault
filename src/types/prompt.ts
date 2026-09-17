@@ -17,6 +17,7 @@ export interface Category {
   name: string;
   slug: string;
   description?: string;
+  isDefault?: boolean; // Tanda apakah kategori bawaan sistem
   color: {
     bg: string;
     text: string;
