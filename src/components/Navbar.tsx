@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Plus, Download, Sparkles } from "lucide-react";
+import { Plus, Download, Bookmark } from "lucide-react";
 
 interface NavbarProps {
   promptCount: number;
@@ -19,8 +19,8 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
         {/* Brand Logo & Count Badge */}
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-            <Sparkles className="w-4 h-4" />
+          <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
+            <Bookmark className="w-4 h-4 text-emerald-400" />
           </div>
           <div className="flex items-center gap-2">
             <span className="text-sm font-semibold tracking-tight text-zinc-50">
@@ -45,10 +45,10 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <button
             onClick={onOpenAddModal}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium text-zinc-950 bg-emerald-400 hover:bg-emerald-300 rounded-lg transition-all shadow-sm active:scale-95"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-zinc-950 bg-emerald-400 hover:bg-emerald-300 rounded-lg transition-all shadow-sm active:scale-95"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>+ Prompt Baru</span>
+            <span>Prompt Baru</span>
           </button>
         </div>
       </div>

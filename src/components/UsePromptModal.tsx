@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { X, Copy, Check, Sparkles } from "lucide-react";
+import { X, Copy, Check, Bookmark } from "lucide-react";
 import { PromptItem } from "@/types/prompt";
 import { extractVariables, replaceVariables } from "@/lib/variableParser";
 
@@ -54,7 +54,7 @@ export const UsePromptModal: React.FC<UsePromptModalProps> = ({
         {/* Modal Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 bg-zinc-950/80">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-emerald-400" />
+            <Bookmark className="w-4 h-4 text-emerald-400" />
             <h2 className="text-sm font-semibold text-zinc-100">
               Gunakan Prompt: {prompt.title}
             </h2>

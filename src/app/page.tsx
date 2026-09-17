@@ -12,10 +12,11 @@ import { Category, PromptItem, SortOption } from "@/types/prompt";
 import {
   getStoredCategories,
   getStoredPrompts,
+  saveCategories,
   savePrompts,
 } from "@/lib/storage";
 import { parseShareableUrlParam } from "@/lib/variableParser";
-import { Plus, RefreshCw, Sparkles } from "lucide-react";
+import { Plus, RefreshCw, Bookmark } from "lucide-react";
 
 export default function DashboardPage() {
   const [prompts, setPrompts] = useState<PromptItem[]>([]);
@@ -65,6 +66,25 @@ export default function DashboardPage() {
   const updatePrompts = (newPrompts: PromptItem[]) => {
     setPrompts(newPrompts);
     savePrompts(newPrompts);
+  };
+
+  // Add new Custom Category
+  const handleAddCategory = (catName: string) => {
+    const newCatId = `custom-${Date.now()}`;
+    const newCategory: Category = {
+      id: newCatId,
+      name: catName,
+      slug: newCatId,
+      color: {
+        bg: "bg-emerald-950/40",
+        text: "text-emerald-300",
+        border: "border-emerald-800/40",
+      },
+    };
+    const updatedCategories = [...categories, newCategory];
+    setCategories(updatedCategories);
+    saveCategories(updatedCategories);
+    setSelectedCategory(newCatId);
   };
 
   // Collect all unique tags
@@ -198,8 +218,9 @@ export default function DashboardPage() {
     }
   };
 
-  const handleImportSuccess = (importedPrompts: PromptItem[]) => {
+  const handleImportSuccess = (importedPrompts: PromptItem[], importedCategories?: Category[]) => {
     setPrompts(importedPrompts);
+    if (importedCategories) setCategories(importedCategories);
   };
 
   const resetFilters = () => {
@@ -229,7 +250,6 @@ export default function DashboardPage() {
           <div>
             <h1 className="text-lg sm:text-xl font-bold tracking-tight text-zinc-50 flex items-center gap-2">
               <span>Universal AI Prompt Vault</span>
-              <Sparkles className="w-4 h-4 text-emerald-400" />
             </h1>
             <p className="mt-1 text-xs sm:text-sm text-zinc-400 max-w-2xl leading-relaxed">
               Simpan, kustomisasi form isian, dan salin template prompt AI terbaikmu untuk penulisan, bisnis, belajar, kreasi visual, hingga koding dalam 1-klik.
@@ -244,7 +264,7 @@ export default function DashboardPage() {
             className="self-start sm:self-auto shrink-0 flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl bg-emerald-400 hover:bg-emerald-300 text-zinc-950 transition-all shadow-md shadow-emerald-500/10 active:scale-95"
           >
             <Plus className="w-4 h-4" />
-            <span>+ Buat Prompt Baru</span>
+            <span>Buat Prompt Baru</span>
           </button>
         </div>
 
@@ -262,6 +282,7 @@ export default function DashboardPage() {
           onToggleFavoritesOnly={() => setShowFavoritesOnly(!showFavoritesOnly)}
           sortBy={sortBy}
           onSortChange={setSortBy}
+          onAddCategory={handleAddCategory}
         />
 
         {/* Prompts Card Grid */}
@@ -289,7 +310,7 @@ export default function DashboardPage() {
           /* Empty Search / Filter State */
           <div className="my-12 text-center py-10 px-4 border border-zinc-800 rounded-xl bg-zinc-900/30 max-w-md mx-auto">
             <div className="w-10 h-10 rounded-full bg-zinc-800/80 flex items-center justify-center mx-auto mb-3 text-zinc-400">
-              <Sparkles className="w-5 h-5 text-emerald-400" />
+              <Bookmark className="w-5 h-5 text-emerald-400" />
             </div>
             <h3 className="text-sm font-semibold text-zinc-200">
               Tidak ada prompt yang cocok

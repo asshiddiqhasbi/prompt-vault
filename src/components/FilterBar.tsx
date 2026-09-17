@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
-import { Search, X, Star, ArrowUpDown } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { Search, X, Star, ArrowUpDown, Plus } from "lucide-react";
 import { Category, SortOption } from "@/types/prompt";
 
 interface FilterBarProps {
@@ -17,6 +17,7 @@ interface FilterBarProps {
   onToggleFavoritesOnly: () => void;
   sortBy: SortOption;
   onSortChange: (sort: SortOption) => void;
+  onAddCategory: (categoryName: string) => void;
 }
 
 export const FilterBar: React.FC<FilterBarProps> = ({
@@ -32,8 +33,11 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   onToggleFavoritesOnly,
   sortBy,
   onSortChange,
+  onAddCategory,
 }) => {
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [newCatName, setNewCatName] = useState("");
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -45,6 +49,14 @@ export const FilterBar: React.FC<FilterBarProps> = ({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  const handleCreateCategory = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCatName.trim()) return;
+    onAddCategory(newCatName.trim());
+    setNewCatName("");
+    setIsAddingCategory(false);
+  };
 
   return (
     <div className="space-y-3 mb-6">
@@ -58,8 +70,8 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           type="text"
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Cari prompt, judul, variabel, atau deskripsi..."
-          className="w-full pl-9 pr-16 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-zinc-700 transition-colors font-mono"
+          placeholder="Cari prompt, judul, atau kata kunci..."
+          className="w-full pl-9 pr-16 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-zinc-700 transition-colors font-sans"
         />
         <div className="absolute inset-y-0 right-0 pr-3 flex items-center gap-1.5 pointer-events-none">
           {searchQuery ? (
@@ -77,16 +89,16 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         </div>
       </div>
 
-      {/* Category Tabs, Sort Selector & Favorite Filter */}
+      {/* Category Tabs, Custom Add Button, Sort & Favorites */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800/80 pb-2">
-        <div className="flex items-center gap-1 overflow-x-auto max-w-full no-scrollbar">
+        <div className="flex items-center gap-1 overflow-x-auto max-w-full no-scrollbar py-0.5">
           {categories.map((cat) => {
             const isSelected = selectedCategory === cat.id;
             return (
               <button
                 key={cat.id}
                 onClick={() => onSelectCategory(cat.id)}
-                className={`px-2.5 py-1 text-xs font-medium rounded transition-colors whitespace-nowrap ${
+                className={`px-2.5 py-1 text-xs font-medium rounded-lg transition-colors whitespace-nowrap ${
                   isSelected
                     ? "bg-zinc-800 text-zinc-100 border border-zinc-700"
                     : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
@@ -96,16 +108,52 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               </button>
             );
           })}
+
+          {/* Add Custom Category Button / Form */}
+          {isAddingCategory ? (
+            <form onSubmit={handleCreateCategory} className="flex items-center gap-1 ml-1">
+              <input
+                type="text"
+                autoFocus
+                value={newCatName}
+                onChange={(e) => setNewCatName(e.target.value)}
+                placeholder="Nama Kategori..."
+                className="px-2 py-0.5 text-xs bg-zinc-900 border border-emerald-500 rounded text-zinc-100 focus:outline-none"
+              />
+              <button
+                type="submit"
+                className="px-2 py-0.5 text-xs bg-emerald-500 text-zinc-950 font-medium rounded hover:bg-emerald-400"
+              >
+                Simpan
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsAddingCategory(false)}
+                className="p-1 text-zinc-400 hover:text-zinc-200"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </form>
+          ) : (
+            <button
+              onClick={() => setIsAddingCategory(true)}
+              className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-emerald-400 hover:text-emerald-300 bg-emerald-950/30 border border-emerald-800/40 rounded-lg hover:bg-emerald-950/60 transition-colors whitespace-nowrap ml-1"
+              title="Tambah Kategori Kustom"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Kategori</span>
+            </button>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
           {/* Sorting Dropdown */}
-          <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 rounded px-2 py-0.5">
+          <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 rounded-lg px-2 py-1">
             <ArrowUpDown className="w-3 h-3 text-zinc-500" />
             <select
               value={sortBy}
               onChange={(e) => onSortChange(e.target.value as SortOption)}
-              className="bg-transparent text-[11px] text-zinc-300 font-mono focus:outline-none cursor-pointer"
+              className="bg-transparent text-[11px] text-zinc-300 font-sans focus:outline-none cursor-pointer"
             >
               <option value="latest">Terbaru</option>
               <option value="most_used">Paling Sering Dipakai</option>
@@ -117,7 +165,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           {/* Favorite Filter Toggle */}
           <button
             onClick={onToggleFavoritesOnly}
-            className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded transition-colors border ${
+            className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg transition-colors border ${
               showFavoritesOnly
                 ? "bg-zinc-800 text-amber-300 border-zinc-700"
                 : "text-zinc-400 border-zinc-800 hover:bg-zinc-900 hover:text-zinc-200"
