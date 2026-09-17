@@ -1,21 +1,24 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { X, Download, Upload, AlertTriangle, CheckCircle } from "lucide-react";
+import { X, Download, Upload, AlertTriangle, CheckCircle, FileText } from "lucide-react";
 import { Category, PromptItem } from "@/types/prompt";
 import { exportDataToJSON, importDataFromJSON } from "@/lib/storage";
+import { downloadCategoryMarkdownBundle } from "@/lib/variableParser";
 
 interface ExportImportModalProps {
   prompts: PromptItem[];
   categories: Category[];
+  selectedCategoryId: string;
   isOpen: boolean;
   onClose: () => void;
-  onImportSuccess: (prompts: PromptItem[], categories: Category[]) => void;
+  onImportSuccess: (prompts: PromptItem[], categories?: Category[]) => void;
 }
 
 export const ExportImportModal: React.FC<ExportImportModalProps> = ({
   prompts,
   categories,
+  selectedCategoryId,
   isOpen,
   onClose,
   onImportSuccess,
@@ -29,8 +32,17 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleExport = () => {
+  const activeCat = categories.find((c) => c.id === selectedCategoryId) || categories[0];
+  const activeCategoryPrompts = selectedCategoryId === "all"
+    ? prompts
+    : prompts.filter((p) => p.categoryId === selectedCategoryId);
+
+  const handleExportJSON = () => {
     exportDataToJSON(prompts, categories);
+  };
+
+  const handleExportCategoryMarkdown = () => {
+    downloadCategoryMarkdownBundle(activeCat.name, activeCategoryPrompts);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,7 +54,7 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
       const content = event.target?.result as string;
       const res = importDataFromJSON(content);
 
-      if (res.success && res.prompts && res.categories) {
+      if (res.success && res.prompts) {
         setImportStatus({
           type: "success",
           message: `Berhasil mengimpor ${res.prompts.length} prompt!`,
@@ -59,12 +71,12 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-200">
       <div className="relative w-full max-w-lg bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800/80 bg-zinc-950/60">
-          <h2 className="text-base font-semibold text-zinc-100">
-            Backup & Restore Data Prompt
+        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 bg-zinc-950/80">
+          <h2 className="text-sm font-semibold text-zinc-100">
+            Backup, Restore & Export Koleksi
           </h2>
           <button
             onClick={onClose}
@@ -75,37 +87,57 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6">
-          {/* Section Export */}
-          <div className="p-4 bg-zinc-950/60 border border-zinc-800 rounded-xl space-y-3">
+        <div className="p-6 space-y-4">
+          {/* Export Bundle Markdown Category */}
+          <div className="p-4 bg-zinc-950/60 border border-zinc-800 rounded-xl space-y-2">
             <div className="flex items-center gap-2">
-              <Download className="w-4 h-4 text-emerald-400" />
-              <h3 className="text-sm font-semibold text-zinc-100">
-                Ekspor Backup (.json)
+              <FileText className="w-4 h-4 text-blue-400" />
+              <h3 className="text-xs font-semibold text-zinc-100">
+                Unduh Bundle Markdown Kategori ({activeCategoryPrompts.length} Prompt)
               </h3>
             </div>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              Unduh seluruh koleksi {prompts.length} prompt dan kategori kamu ke dalam file JSON lokal. Data ini aman dan dapat dipulihkan kapan saja.
+              Unduh seluruh {activeCategoryPrompts.length} prompt pada kategori <span className="text-zinc-200 font-semibold">{activeCat.name}</span> menjadi 1 file dokumentasi Markdown (.md).
             </p>
             <button
-              onClick={handleExport}
-              className="flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-zinc-950 border border-emerald-500/30 transition-all"
+              onClick={handleExportCategoryMarkdown}
+              className="flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-lg bg-blue-500/10 hover:bg-blue-500 text-blue-400 hover:text-zinc-950 border border-blue-500/30 transition-all"
             >
-              <Download className="w-4 h-4" />
+              <FileText className="w-3.5 h-3.5" />
+              <span>Unduh Bundle Markdown ({activeCat.name})</span>
+            </button>
+          </div>
+
+          {/* Section Export JSON */}
+          <div className="p-4 bg-zinc-950/60 border border-zinc-800 rounded-xl space-y-2">
+            <div className="flex items-center gap-2">
+              <Download className="w-4 h-4 text-emerald-400" />
+              <h3 className="text-xs font-semibold text-zinc-100">
+                Ekspor Backup JSON Total ({prompts.length} Prompt)
+              </h3>
+            </div>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Unduh seluruh koleksi prompt dan kategori kamu ke dalam file JSON lokal untuk pencadangan aman.
+            </p>
+            <button
+              onClick={handleExportJSON}
+              className="flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-lg bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-zinc-950 border border-emerald-500/30 transition-all"
+            >
+              <Download className="w-3.5 h-3.5" />
               <span>Unduh File Backup JSON</span>
             </button>
           </div>
 
           {/* Section Import */}
-          <div className="p-4 bg-zinc-950/60 border border-zinc-800 rounded-xl space-y-3">
+          <div className="p-4 bg-zinc-950/60 border border-zinc-800 rounded-xl space-y-2">
             <div className="flex items-center gap-2">
-              <Upload className="w-4 h-4 text-blue-400" />
-              <h3 className="text-sm font-semibold text-zinc-100">
+              <Upload className="w-4 h-4 text-zinc-400" />
+              <h3 className="text-xs font-semibold text-zinc-100">
                 Impor File Backup (.json)
               </h3>
             </div>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              Unggah file backup `.json` sebelumnya untuk mengembalikan atau memperbarui data prompt di browser ini.
+              Unggah file backup `.json` sebelumnya untuk memulihkan koleksi prompt kamu.
             </p>
 
             <input
@@ -118,9 +150,9 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
 
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-lg bg-blue-500/10 hover:bg-blue-500 text-blue-400 hover:text-zinc-950 border border-blue-500/30 transition-all"
+              className="flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 transition-all"
             >
-              <Upload className="w-4 h-4" />
+              <Upload className="w-3.5 h-3.5" />
               <span>Pilih File Backup JSON</span>
             </button>
           </div>
@@ -145,7 +177,7 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end px-6 py-4 border-t border-zinc-800/80 bg-zinc-950/80">
+        <div className="flex items-center justify-end px-6 py-4 border-t border-zinc-800 bg-zinc-950">
           <button
             onClick={onClose}
             className="px-4 py-2 text-xs font-medium text-zinc-400 hover:text-zinc-200"

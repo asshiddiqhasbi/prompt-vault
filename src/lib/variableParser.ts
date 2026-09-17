@@ -7,9 +7,9 @@ import { PromptItem } from "@/types/prompt";
 const VARIABLE_REGEX = /\{\{([A-Z0-9_]+)\}\}/gi;
 
 export interface ExtractedVariable {
-  key: string; // Misal: IDE_PRODUK
-  placeholder: string; // Misal: {{IDE_PRODUK}}
-  label: string; // Misal: "Ide Produk"
+  key: string;
+  placeholder: string;
+  label: string;
 }
 
 /**
@@ -68,7 +68,7 @@ export function replaceVariables(
 }
 
 /**
- * Mengubah PromptItem menjadi format markdown SKILL.md (v2.0)
+ * Mengubah PromptItem menjadi format markdown SKILL.md
  */
 export function generateSkillMarkdown(prompt: PromptItem): string {
   const vars = extractVariables(prompt.content);
@@ -103,7 +103,7 @@ ${prompt.content}
 ## 5. Metadata
 - Category: ${prompt.categoryId}
 - Tags: ${prompt.tags?.join(", ") || "-"}
-- Exported from: PromptVault v2.0
+- Exported from: PromptVault
 `;
 }
 
@@ -126,7 +126,37 @@ export function downloadSkillMarkdown(prompt: PromptItem): void {
 }
 
 /**
- * Mengencode prompt menjadi URL Shareable (v2.0)
+ * Mengunduh seluruh koleksi prompt dalam 1 file Bundle Markdown (.md)
+ */
+export function downloadCategoryMarkdownBundle(categoryName: string, prompts: PromptItem[]): void {
+  const dateStr = new Date().toISOString().split("T")[0];
+  let mdContent = `# Koleksi Prompt: ${categoryName}\n`;
+  mdContent += `> Diunduh dari PromptVault pada ${dateStr} (${prompts.length} prompt)\n\n---\n\n`;
+
+  prompts.forEach((p, idx) => {
+    const vars = extractVariables(p.content);
+    mdContent += `## ${idx + 1}. ${p.title}\n`;
+    if (p.description) mdContent += `*${p.description}*\n\n`;
+    if (p.tags && p.tags.length > 0) mdContent += `**Tags**: ${p.tags.join(" ")}\n\n`;
+    if (vars.length > 0) mdContent += `**Variabel Form**: ${vars.map((v) => `\`{{${v.key}}}\``).join(", ")}\n\n`;
+    mdContent += `\`\`\`text\n${p.content}\n\`\`\`\n\n---\n\n`;
+  });
+
+  const blob = new Blob([mdContent], { type: "text/markdown;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+
+  const slug = categoryName.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `koleksi-prompt-${slug}-${dateStr}.md`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * Mengencode prompt menjadi URL Shareable
  */
 export function generateShareableUrl(prompt: PromptItem): string {
   if (typeof window === "undefined") return "";
@@ -140,7 +170,6 @@ export function generateShareableUrl(prompt: PromptItem): string {
   };
 
   const jsonStr = JSON.stringify(payload);
-  // Base64 encode safe for URL
   const encoded = btoa(encodeURIComponent(jsonStr));
   const baseUrl = window.location.origin + window.location.pathname;
   return `${baseUrl}?share=${encoded}`;
@@ -162,7 +191,7 @@ export function parseShareableUrlParam(encodedStr: string): Partial<PromptItem> 
       title: String(parsed.t).trim(),
       description: typeof parsed.d === "string" ? parsed.d.trim() : "",
       content: String(parsed.c).trim(),
-      categoryId: typeof parsed.cat === "string" ? parsed.cat : "engineering",
+      categoryId: typeof parsed.cat === "string" ? parsed.cat : "writing",
       tags: Array.isArray(parsed.tags) ? parsed.tags : [],
     };
   } catch (err) {

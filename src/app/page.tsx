@@ -116,13 +116,12 @@ export default function DashboardPage() {
     saveCategories(updatedCategories);
   };
 
-  // Delete Custom Category (Safely re-assign prompts to 'writing' or 'tech')
+  // Delete Custom Category
   const handleDeleteCategory = (catId: string) => {
     const updatedCategories = categories.filter((c) => c.id !== catId);
     setCategories(updatedCategories);
     saveCategories(updatedCategories);
 
-    // Re-assign prompts in deleted category to 'writing'
     const updatedPrompts = prompts.map((p) =>
       p.categoryId === catId ? { ...p, categoryId: "writing" } : p
     );
@@ -140,26 +139,19 @@ export default function DashboardPage() {
     return Array.from(tagsSet);
   }, [prompts]);
 
-  // Filter & Sort Logic
+  // Filter & Sort Logic (Always pin favorites to top)
   const filteredPrompts = useMemo(() => {
     const filtered = prompts.filter((prompt) => {
-      // Filter Category
       if (selectedCategory !== "all" && prompt.categoryId !== selectedCategory) {
         return false;
       }
-
-      // Filter Favorites
       if (showFavoritesOnly && !prompt.isFavorite) {
         return false;
       }
-
-      // Filter Tags
       if (selectedTags.length > 0) {
         const hasAllTags = selectedTags.every((t) => prompt.tags?.includes(t));
         if (!hasAllTags) return false;
       }
-
-      // Filter Search Query
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
         const matchesTitle = prompt.title.toLowerCase().includes(query);
@@ -171,12 +163,16 @@ export default function DashboardPage() {
           return false;
         }
       }
-
       return true;
     });
 
-    // Sorting Logic
+    // Sort Order with Pinned Favorites Prioritization
     return filtered.sort((a, b) => {
+      // Pinned Favorites always stay on top unless sorting specifically by other criteria
+      if (a.isFavorite !== b.isFavorite) {
+        return a.isFavorite ? -1 : 1;
+      }
+
       if (sortBy === "most_used") {
         return (b.copyCount || 0) - (a.copyCount || 0);
       }
@@ -188,7 +184,6 @@ export default function DashboardPage() {
       if (sortBy === "alphabetical") {
         return a.title.localeCompare(b.title);
       }
-      // Default 'latest'
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
   }, [prompts, selectedCategory, showFavoritesOnly, selectedTags, searchQuery, sortBy]);
@@ -198,7 +193,6 @@ export default function DashboardPage() {
     setSelectedPromptForUse(prompt);
     setIsUseModalOpen(true);
 
-    // Track usage count & last used
     const updated = prompts.map((p) =>
       p.id === prompt.id
         ? {
@@ -220,7 +214,6 @@ export default function DashboardPage() {
 
   const handleSavePrompt = (data: Partial<PromptItem>) => {
     if (data.id) {
-      // Edit existing
       const updated = prompts.map((p) =>
         p.id === data.id
           ? {
@@ -232,7 +225,6 @@ export default function DashboardPage() {
       );
       updatePrompts(updated as PromptItem[]);
     } else {
-      // Add new
       const newPrompt: PromptItem = {
         id: `prompt-${Date.now()}`,
         title: data.title || "Untitled Prompt",
@@ -403,6 +395,7 @@ export default function DashboardPage() {
       <PromptEditorModal
         promptToEdit={promptToEdit}
         categories={categories}
+        existingTags={allTags}
         isOpen={isEditorModalOpen}
         onClose={() => setIsEditorModalOpen(false)}
         onSave={handleSavePrompt}
@@ -411,6 +404,7 @@ export default function DashboardPage() {
       <ExportImportModal
         prompts={prompts}
         categories={categories}
+        selectedCategoryId={selectedCategory}
         isOpen={isBackupModalOpen}
         onClose={() => setIsBackupModalOpen(false)}
         onImportSuccess={handleImportSuccess}
