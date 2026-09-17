@@ -15,7 +15,7 @@ import {
   savePrompts,
 } from "@/lib/storage";
 import { parseShareableUrlParam } from "@/lib/variableParser";
-import { Plus, RefreshCw, Terminal } from "lucide-react";
+import { Plus, RefreshCw, Sparkles } from "lucide-react";
 
 export default function DashboardPage() {
   const [prompts, setPrompts] = useState<PromptItem[]>([]);
@@ -172,7 +172,7 @@ export default function DashboardPage() {
         title: data.title || "Untitled Prompt",
         description: data.description || "",
         content: data.content || "",
-        categoryId: data.categoryId || "engineering",
+        categoryId: data.categoryId || "writing",
         tags: data.tags || [],
         isFavorite: false,
         copyCount: 0,
@@ -223,17 +223,29 @@ export default function DashboardPage() {
       />
 
       {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-5">
-        {/* Header Title */}
-        <div className="mb-4 flex items-center justify-between">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6">
+        {/* Welcome Banner */}
+        <div className="mb-6 p-5 sm:p-6 rounded-2xl bg-zinc-900/80 border border-zinc-800/90 shadow-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-lg font-semibold tracking-tight text-zinc-100">
-              Prompt Collection
+            <h1 className="text-lg sm:text-xl font-bold tracking-tight text-zinc-50 flex items-center gap-2">
+              <span>Universal AI Prompt Vault</span>
+              <Sparkles className="w-4 h-4 text-emerald-400" />
             </h1>
-            <p className="text-xs text-zinc-400">
-              Koleksi prompt terorganisir dengan pengisian variabel dinamis.
+            <p className="mt-1 text-xs sm:text-sm text-zinc-400 max-w-2xl leading-relaxed">
+              Simpan, kustomisasi form isian, dan salin template prompt AI terbaikmu untuk penulisan, bisnis, belajar, kreasi visual, hingga koding dalam 1-klik.
             </p>
           </div>
+
+          <button
+            onClick={() => {
+              setPromptToEdit(null);
+              setIsEditorModalOpen(true);
+            }}
+            className="self-start sm:self-auto shrink-0 flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl bg-emerald-400 hover:bg-emerald-300 text-zinc-950 transition-all shadow-md shadow-emerald-500/10 active:scale-95"
+          >
+            <Plus className="w-4 h-4" />
+            <span>+ Buat Prompt Baru</span>
+          </button>
         </div>
 
         {/* Filter & Search Controls */}
@@ -275,20 +287,20 @@ export default function DashboardPage() {
           </div>
         ) : (
           /* Empty Search / Filter State */
-          <div className="my-12 text-center py-10 px-4 border border-zinc-800 rounded-lg bg-zinc-900/20 max-w-md mx-auto">
-            <div className="w-10 h-10 rounded bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto mb-3 text-zinc-500">
-              <Terminal className="w-4 h-4" />
+          <div className="my-12 text-center py-10 px-4 border border-zinc-800 rounded-xl bg-zinc-900/30 max-w-md mx-auto">
+            <div className="w-10 h-10 rounded-full bg-zinc-800/80 flex items-center justify-center mx-auto mb-3 text-zinc-400">
+              <Sparkles className="w-5 h-5 text-emerald-400" />
             </div>
-            <h3 className="text-xs font-semibold text-zinc-300">
-              Tidak ada prompt ditemukan
+            <h3 className="text-sm font-semibold text-zinc-200">
+              Tidak ada prompt yang cocok
             </h3>
-            <p className="text-xs text-zinc-500 mt-1 mb-4 font-mono">
-              Ganti kata kunci atau reset filter.
+            <p className="text-xs text-zinc-400 mt-1 mb-4">
+              Coba ganti kata kunci pencarian atau reset filter kategori & tag.
             </p>
             <div className="flex items-center justify-center gap-2">
               <button
                 onClick={resetFilters}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-zinc-300 bg-zinc-800 hover:bg-zinc-700 rounded transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-zinc-300 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 <span>Reset Filter</span>
@@ -299,10 +311,10 @@ export default function DashboardPage() {
                   setPromptToEdit(null);
                   setIsEditorModalOpen(true);
                 }}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-zinc-950 bg-zinc-100 hover:bg-zinc-200 rounded transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-zinc-950 bg-emerald-400 hover:bg-emerald-300 rounded-lg transition-colors"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>Buat Prompt</span>
+                <span>Buat Prompt Baru</span>
               </button>
             </div>
           </div>
@@ -310,8 +322,8 @@ export default function DashboardPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-zinc-800/80 bg-zinc-950 py-4 text-center text-[11px] font-mono text-zinc-500">
-        <p>PromptVault v2.0 • Modern Minimalist Developer Tool</p>
+      <footer className="border-t border-zinc-800/80 bg-zinc-950 py-5 text-center text-xs text-zinc-500">
+        <p>PromptVault • Universal AI Prompt & Workflow Manager for Everyone</p>
       </footer>
 
       {/* Modals */}
