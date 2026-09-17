@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { X, Save, Info, PlusCircle, Wand2, Tag as TagIcon } from "lucide-react";
+import { X, Save, Info, PlusCircle, Tag as TagIcon } from "lucide-react";
 import { Category, PromptItem } from "@/types/prompt";
 import { extractVariables } from "@/lib/variableParser";
 
@@ -16,8 +16,8 @@ interface PromptEditorModalProps {
 
 const TEMPLATE_PRESETS = [
   {
-    name: "📢 Formula AIDA (Marketing)",
-    title: "🛍️ Copywriting Penjualan AIDA",
+    name: "AIDA Marketing",
+    title: "Copywriting Penjualan AIDA",
     categoryId: "business",
     description: "Template copy jualan berdaya konversi tinggi (Attention, Interest, Desire, Action)",
     content: `Kamu adalah copywriter profesional. Buatkan copy penawaran jualan untuk produk berikut.
@@ -33,8 +33,8 @@ Gunakan Formula AIDA:
 - Action (CTA): Panggilan bertindak membeli (misal: "Klik link di bio!").`,
   },
   {
-    name: "🧠 Metode Feynman (Edukasi)",
-    title: "🧠 Penjelas Konsep Rumit Bahasa Sederhana",
+    name: "Metode Feynman",
+    title: "Penjelas Konsep Rumit Bahasa Sederhana",
     categoryId: "education",
     description: "Jelaskan topik akademik/sains rumit seolah-olah mengajar anak usia 10 tahun",
     content: `Berperanlah sebagai edukator jenius. Jelaskan konsep berikut menggunakan Metode Feynman.
@@ -47,8 +47,8 @@ Aturan:
 3. Hindari kata jargon. Jelaskan dalam 3 paragraf singkat.`,
   },
   {
-    name: "🎭 Role + Task + Constraint (Umum)",
-    title: "📋 Prompt Struktur Profesional (Role + Task)",
+    name: "Role & Task Structure",
+    title: "Prompt Struktur Profesional (Role + Task)",
     categoryId: "writing",
     description: "Template prompt umum terstruktur (Peran, Tugas, Konteks, Batasan)",
     content: `Kamu adalah {{ROLE}}. Saya membutuhkan kamu untuk mengerjakan tugas berikut.
@@ -177,12 +177,11 @@ export const PromptEditorModal: React.FC<PromptEditorModalProps> = ({
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-5 overflow-y-auto space-y-4">
-          {/* Wizard Template Presets (Only when adding new) */}
+          {/* Preset Template Buttons (Clean text, no emojis/sparkles) */}
           {!promptToEdit && (
             <div className="p-3 bg-zinc-950 border border-zinc-800 rounded-lg space-y-2">
-              <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400">
-                <Wand2 className="w-3.5 h-3.5" />
-                <span>Gunakan Struktur Wizard Template:</span>
+              <div className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-400 font-mono">
+                <span>Preset Template:</span>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {TEMPLATE_PRESETS.map((p) => (
@@ -190,7 +189,7 @@ export const PromptEditorModal: React.FC<PromptEditorModalProps> = ({
                     key={p.name}
                     type="button"
                     onClick={() => handleApplyTemplate(p)}
-                    className="px-2.5 py-1 text-[11px] bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700/80 rounded transition-colors"
+                    className="px-2.5 py-1 text-[11px] bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 rounded transition-colors"
                   >
                     {p.name}
                   </button>
@@ -244,7 +243,7 @@ export const PromptEditorModal: React.FC<PromptEditorModalProps> = ({
               {existingTags.length > 0 && (
                 <div className="flex flex-wrap items-center gap-1 pt-1">
                   <span className="text-[10px] text-zinc-500 font-mono flex items-center gap-0.5 mr-0.5">
-                    <TagIcon className="w-2.5 h-2.5" /> Pilih Tag:
+                    <TagIcon className="w-2.5 h-2.5" /> Tag:
                   </span>
                   {existingTags.slice(0, 6).map((tag) => (
                     <button

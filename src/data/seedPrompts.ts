@@ -10,58 +10,58 @@ export const DEFAULT_CATEGORIES: Category[] = [
   },
   {
     id: "writing",
-    name: "✍️ Writing & Copywriting",
+    name: "Writing & Copywriting",
     slug: "writing",
     isDefault: true,
     description: "Script video, artikel, email, caption, dan penulisan kreatif",
-    color: { bg: "bg-purple-950/50", text: "text-purple-300", border: "border-purple-800/40" }
+    color: { bg: "bg-zinc-900", text: "text-purple-300", border: "border-purple-800/40" }
   },
   {
     id: "business",
-    name: "🚀 Business & Marketing",
+    name: "Business & Marketing",
     slug: "business",
     isDefault: true,
     description: "Copy iklan, strategi jualan, pitch deck, dan ide bisnis",
-    color: { bg: "bg-blue-950/50", text: "text-blue-300", border: "border-blue-800/40" }
+    color: { bg: "bg-zinc-900", text: "text-blue-300", border: "border-blue-800/40" }
   },
   {
     id: "education",
-    name: "🎓 Education & Study",
+    name: "Education & Study",
     slug: "education",
     isDefault: true,
     description: "Rangkum jurnal/artikel, penjelas konsep, dan latihan soal",
-    color: { bg: "bg-emerald-950/50", text: "text-emerald-300", border: "border-emerald-800/40" }
+    color: { bg: "bg-zinc-900", text: "text-emerald-300", border: "border-emerald-800/40" }
   },
   {
     id: "creative",
-    name: "🎨 Creativity & Visual AI",
+    name: "Creativity & Visual AI",
     slug: "creative",
     isDefault: true,
     description: "Prompt gambar Midjourney/DALL-E, ide konten, dan visual",
-    color: { bg: "bg-rose-950/50", text: "text-rose-300", border: "border-rose-800/40" }
+    color: { bg: "bg-zinc-900", text: "text-rose-300", border: "border-rose-800/40" }
   },
   {
     id: "productivity",
-    name: "⚡ Productivity & Daily",
+    name: "Productivity & Daily",
     slug: "productivity",
     isDefault: true,
     description: "Perencanaan harian, balasan chat/email, dan habit tracker",
-    color: { bg: "bg-amber-950/50", text: "text-amber-300", border: "border-amber-800/40" }
+    color: { bg: "bg-zinc-900", text: "text-amber-300", border: "border-amber-800/40" }
   },
   {
     id: "tech",
-    name: "💻 Tech & Engineering",
+    name: "Tech & Engineering",
     slug: "tech",
     isDefault: true,
     description: "Debugging error, koding, PRD produk, dan arsitektur tech",
-    color: { bg: "bg-cyan-950/50", text: "text-cyan-300", border: "border-cyan-800/40" }
+    color: { bg: "bg-zinc-900", text: "text-cyan-300", border: "border-cyan-800/40" }
   }
 ];
 
 export const SEED_PROMPTS: PromptItem[] = [
   {
     id: "prompt-1-script-viral",
-    title: "🎬 Script Video Shorts / TikTok / Reels Viral",
+    title: "Script Video Shorts / TikTok / Reels",
     description: "Bikin script video pendek dengan Hook memikat, isi padat, dan Call-to-Action dalam 60 detik.",
     content: `Kamu adalah ahli pembuat konten video pendek (TikTok/Reels/Shorts). Buatkan script video berdurasi 30-60 detik tentang topik berikut.
 
@@ -85,7 +85,7 @@ Gunakan gaya bahasa yang santai, komunikatif, dan menarik tanpa bertele-tele.`,
   },
   {
     id: "prompt-2-rangkum-jurnal",
-    title: "📚 Rangkum Artikel / Jurnal Panjang Jadi Bullet Points",
+    title: "Rangkum Artikel / Jurnal Panjang",
     description: "Mengubah artikel ilmiah, bacaan panjang, atau berita menjadi poin ringkas yang mudah dipahami.",
     content: `Berperanlah sebagai asisten akademis. Rangkum teks/bacaan berikut agar saya bisa memahaminya dalam waktu 2 menit.
 
@@ -108,7 +108,7 @@ Gunakan bahasa Indonesia yang jelas, bernomor, dan objektif.`,
   },
   {
     id: "prompt-3-email-profesional",
-    title: "✉️ Draft Balasan Email Profesional & Sopan",
+    title: "Draft Balasan Email Profesional",
     description: "Menyusun draft email bisnis, permohonan, izin, atau balasan kerja yang elegan dan tegas.",
     content: `Kamu adalah spesialis komunikasi bisnis profesional. Tuliskan draft email yang sopan, jelas, dan efektif.
 
@@ -135,7 +135,7 @@ Tulis dalam format yang siap di-copy dan dikirim.`,
   },
   {
     id: "prompt-4-copy-jualan",
-    title: "🛍️ Copywriting Caption Instagram & Iklan Jualan",
+    title: "Copywriting Caption & Iklan Jualan",
     description: "Membuat caption promosi jualan produk/jasa yang menghipnotis pembeli menggunakan formula AIDA.",
     content: `Kamu adalah ahli copywriter jualan online. Buatkan caption jualan berdaya konversi tinggi untuk produk berikut.
 
@@ -160,7 +160,7 @@ Sertakan 5-8 hashtag populer yang relevan untuk jualan di Instagram/TikTok.`,
   },
   {
     id: "prompt-5-midjourney-prompt",
-    title: "🎨 Generator Prompt Midjourney / DALL-E Photo Realistis",
+    title: "Prompt Midjourney / DALL-E Photo Realistis",
     description: "Membuat prompt AI Image generator lengkap dengan spesifikasi kamera, lighting, dan style.",
     content: `Kamu adalah pakar prompt engineer AI Image (Midjourney v6 / DALL-E 3). Buatkan prompt gambar dalam bahasa Inggris yang detail dan menakjubkan.
 
@@ -181,7 +181,7 @@ Hasilkan:
   },
   {
     id: "prompt-6-feynman-method",
-    title: "🧠 Penjelas Konsep Rumit Bahasa Sederhana (Feynman)",
+    title: "Penjelas Konsep Rumit (Metode Feynman)",
     description: "Jelaskan konsep akademik, sains, bisnis, atau teknologi seolah-olah mengajar anak usia 10 tahun.",
     content: `Berperanlah sebagai komunikator sains dan edukator jenius. Jelaskan konsep berikut menggunakan Metode Feynman.
 
@@ -202,7 +202,7 @@ Gunakan aturan berikut:
   },
   {
     id: "prompt-7-ide-bisnis",
-    title: "💼 Perencana Strategi Bisnis & Ide Konten",
+    title: "Perencana Strategi Bisnis & Ide Konten",
     description: "Merancang strategi eksekusi bisnis baru, analisis kompetitor, dan ide promosi awal.",
     content: `Kamu adalah konsultan bisnis startup dan strategi pemasaran. Berikan analisis dan rencana eksekusi bisnis berikut.
 
@@ -224,7 +224,7 @@ Buatkan rencana strategi ringkas:
   },
   {
     id: "prompt-8-prd-tech",
-    title: "💻 Tulis PRD & Spek Produk (Product Spec)",
+    title: "Tulis PRD & Spek Produk (Product Spec)",
     description: "Menyusun Product Requirement Document lengkap untuk pengembangan fitur aplikasi.",
     content: `Kamu adalah senior product manager. Saya butuh PRD lengkap untuk produk berikut:
 
